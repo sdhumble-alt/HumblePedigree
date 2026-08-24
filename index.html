@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A Humble Pedigree</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/webfont/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:11pt;background:#f0f2f5;color:#1e2a3a;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+#app{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;background:#fff;}
+
+/* Top Header */
+#app-header{background:#1e2a3a;padding:9px 16px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #12202e;}
+.header-titles{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;}
+#app-title{font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:bold;color:#fff;letter-spacing:0.01em;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
+#app-subtitle{font-size:10px;color:rgba(255,255,255,0.65);font-style:italic;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
+.toolbar-ver{font-size:8pt;color:rgba(255,255,255,0.4);font-family:Arial,sans-serif;white-space:nowrap;margin-left:16px;}
+
+/* Split Layout */
+.content{display:flex;flex:1;overflow:hidden;}
+.split-layout{display:grid;grid-template-columns:minmax(330px,360px) 1fr;gap:18px;height:100%;width:100%;overflow:hidden;align-items:stretch;padding:16px;}
+.split-left{height:100%;overflow-y:auto;padding-right:6px;}
+.split-right{height:100%;overflow-y:auto;background:#f9fafc;border:1px solid #d0d7e2;border-radius:8px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;}
+
+/* Cards & Option Groups */
+.opt-group{border:1px solid #bbbbbb;border-radius:8px;margin-bottom:14px;overflow:hidden;background:#ffffff;}
+.opt-group-header{background:#f5f5f5;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cccccc;}
+.opt-group-header-left{display:flex;align-items:center;gap:6px;}
+.opt-group-header i{font-size:14px;color:#666;}
+.opt-group-title{font-size:9pt;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;}
+.opt-group-body{padding:12px;}
+
+/* Action Buttons */
+.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.act-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:6px;cursor:pointer;font-size:8pt;font-weight:600;color:#334155;transition:all .12s;text-align:center;}
+.act-btn:hover:not(:disabled){background:#eef3fb;border-color:#3266ad;color:#1e429f;}
+.act-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.act-btn i{font-size:16px;}
+
+/* Inputs & Form Elements */
+input[type=text],select{border:1.5px solid #aaaaaa;border-radius:6px;padding:6px 9px;font-size:10pt;font-family:Arial,sans-serif;background:#ffffff;color:#222222;outline:none;transition:border-color .15s,box-shadow .15s;min-width:0;width:100%;box-sizing:border-box;}
+input[type=text]:hover,select:hover{border-color:#777777;}
+input[type=text]:focus,select:focus{border-color:#3266ad;border-width:2px;box-shadow:0 0 0 3px rgba(50,102,173,0.15);}
+.field-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.field-row label{font-size:9.5pt;color:#555555;font-weight:600;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.toggle-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.toggle-row label{font-size:10pt;color:#222;cursor:pointer;}
+input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:#3266ad;}
+
+/* Visual Selection Boxes */
+.visual-picker{display:flex;gap:4px;}
+.vp-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #cbd5e1;border-radius:6px;cursor:pointer;transition:all .1s;padding:0;}
+.vp-btn:hover{border-color:#94a3b8;background:#f8fafc;}
+.vp-btn.selected{border-color:#3266ad;background:#eef3fb;box-shadow:0 0 0 2px rgba(50,102,173,0.15);}
+.vp-btn svg{width:20px;height:20px;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;border-radius:6px;padding:6px 12px;font-size:9.5pt;font-family:Arial,sans-serif;font-weight:600;cursor:pointer;transition:all .12s;border:none;}
+.btn-primary{background:#3266ad;color:#fff;}
+.btn-primary:hover{background:#185fa5;}
+.btn-secondary{background:#ffffff;color:#333;border:1.5px solid #aaaaaa;}
+.btn-secondary:hover{background:#f0f0f0;border-color:#777;}
+.btn-green{background:#1a7a3a;color:#fff;}
+.btn-green:hover{background:#145e2c;}
+.btn-danger{background:#b00020;color:#fff;}
+.btn-danger:hover{background:#8e001a;}
+.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;justify-content:center;}
+
+/* Canvas Stage */
+.canvas-wrapper{position:relative;background:#ffffff;border:1px solid #d0d7e2;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);overflow:hidden;}
+#pedigreeCanvas{display:block;cursor:pointer;}
+.copy-feedback{font-size:9.5pt;color:#2e7d32;font-weight:600;display:none;align-items:center;gap:4px;margin-top:4px;}
+.action-banner{background:#e8f0fe;border:1px solid #c2dbfe;border-radius:6px;padding:8px 10px;font-size:8.5pt;color:#1e429f;margin-bottom:12px;line-height:1.4;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP HEADER -->
+  <div id="app-header">
+    <div class="header-titles">
+      <div id="app-title">A Humble Pedigree</div>
+      <div id="app-subtitle">Simple Pedigree Engine - Build by Steven Humble</div>
+    </div>
+    <span class="toolbar-ver">V 1.0.0.</span>
+  </div>
+
+  <!-- SPLIT CONTENT -->
+  <div class="content">
+    <div class="split-layout">
+      
+      <!-- LEFT PANEL -->
+      <div class="split-left" id="controls-panel">
+
+        <!-- Relative Actions -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-user-plus"></i><span class="opt-group-title">Family Actions</span></div>
+          </div>
+          <div class="opt-group-body">
+            <div class="action-grid">
+              <button class="act-btn" id="btnAddParents" onclick="actionAddParents()" disabled><i class="ti ti-arrow-up"></i> Add Parents</button>
+              <button class="act-btn" id="btnAddSpouse" onclick="actionAddSpouse()" disabled><i class="ti ti-heart"></i> Add Partner</button>
+              <button class="act-btn" id="btnAddSibling" onclick="actionAddSibling()" disabled><i class="ti ti-arrows-left-right"></i> Add Sibling</button>
+              
+              <button class="act-btn" id="btnAddSon" onclick="actionAddChild(1)" disabled><i class="ti ti-square-plus"></i> Add Son</button>
+              <button class="act-btn" id="btnAddDaughter" onclick="actionAddChild(2)" disabled><i class="ti ti-circle-plus"></i> Add Daughter</button>
+              <button class="act-btn" id="btnAddUnknown" onclick="actionAddChild(0)" disabled><i class="ti ti-help"></i> Add Unknown</button>
+
+              <button class="act-btn" id="btnAddIdentTwin" onclick="actionAddTwin(true)" disabled><i class="ti ti-vector-triangle"></i> Identical Twin</button>
+              <button class="act-btn" id="btnAddFratTwin" onclick="actionAddTwin(false)" disabled><i class="ti ti-vector-bezier"></i> Frat. Twin</button>
+              <button class="act-btn" id="btnDeleteMember" onclick="actionDeleteSelected()" disabled style="color:#b00020; border-color:#e2b0b0;"><i class="ti ti-trash"></i> Delete</button>
+            </div>
+            <div class="grid-2">
+              <button class="btn btn-secondary" onclick="actionShiftOrder(-1)" id="btnShiftLeft" disabled><i class="ti ti-arrow-left"></i> Shift Left</button>
+              <button class="btn btn-secondary" onclick="actionShiftOrder(1)" id="btnShiftRight" disabled>Shift Right <i class="ti ti-arrow-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Node Inspector -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-adjustments"></i><span class="opt-group-title">Individual Attributes</span></div>
+          </div>
+          <div class="opt-group-body">
+            <div id="inspector-content" style="display:none;">
+
+              <div class="grid-2" style="margin-bottom:8px;">
+                <div class="field-row">
+                  <label>Sex / Shape</label>
+                  <div class="visual-picker" id="sexPicker">
+                    <button class="vp-btn" data-val="1" onclick="setNodeSex(1)" title="Male">
+                      <svg><rect x="3" y="3" width="14" height="14" fill="#fff" stroke="#1e2a3a" stroke-width="1.5"/></svg>
+                    </button>
+                    <button class="vp-btn" data-val="2" onclick="setNodeSex(2)" title="Female">
+                      <svg><circle cx="10" cy="10" r="7" fill="#fff" stroke="#1e2a3a" stroke-width="1.5"/></svg>
+                    </button>
+                    <button class="vp-btn" data-val="0" onclick="setNodeSex(0)" title="Unknown">
+                      <svg><polygon points="10,3 17,10 10,17 3,10" fill="#fff" stroke="#1e2a3a" stroke-width="1.5"/></svg>
+                    </button>
+                    <button class="vp-btn" data-val="3" onclick="setNodeSex(3)" title="Termination">
+                      <svg><polygon points="10,4 16,16 4,16" fill="#fff" stroke="#1e2a3a" stroke-width="1.5"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <label>Affection Status</label>
+                  <div class="visual-picker" id="statusPicker">
+                    <button class="vp-btn" data-val="1" onclick="setNodeStatus('1')" title="Unaffected">
+                      <svg><rect x="3" y="3" width="14" height="14" fill="#fff" stroke="#1e2a3a" stroke-width="1.5"/></svg>
+                    </button>
+                    <button class="vp-btn" data-val="2" onclick="setNodeStatus('2')" title="Affected">
+                      <svg><rect x="3" y="3" width="14" height="14" fill="#1e2a3a" stroke="#1e2a3a" stroke-width="1.5"/></svg>
+                    </button>
+                    <button class="vp-btn" data-val="carrier" onclick="setNodeStatus('carrier')" title="Carrier">
+                      <svg><rect x="3" y="3" width="14" height="14" fill="#fff" stroke="#1e2a3a" stroke-width="1.5"/><path d="M3,3 L3,17 L10,17 L10,3 Z" fill="#1e2a3a"/></svg>
+                    </button>
+                    <button class="vp-btn" data-val="carrier_dot" onclick="setNodeStatus('carrier_dot')" title="X-Linked Carrier">
+                      <svg><rect x="3" y="3" width="14" height="14" fill="#fff" stroke="#1e2a3a" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" fill="#1e2a3a"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="field-row">
+                  <label>Genotype / Text</label>
+                  <input type="text" id="nodeGenotype" placeholder="" oninput="updateSelectedAttributes()">
+                </div>
+                <div class="field-row">
+                  <label>Custom ID / Name</label>
+                  <input type="text" id="nodeCustomLabel" placeholder="" oninput="updateSelectedAttributes()">
+                </div>
+              </div>
+
+              <div class="grid-2" style="margin-top:2px;">
+                <div class="toggle-row">
+                  <input type="checkbox" id="nodeDeceased" onchange="updateSelectedAttributes()">
+                  <label for="nodeDeceased">Deceased (/)</label>
+                </div>
+                <div class="toggle-row">
+                  <input type="checkbox" id="nodeProband" onchange="updateSelectedAttributes()">
+                  <label for="nodeProband">Proband (P ↗)</label>
+                </div>
+              </div>
+            </div>
+            <div id="inspector-empty" style="color:#777; font-size:9.5pt; font-style:italic; text-align:center; padding:10px 0;">
+              No individual selected. Click anyone in the pedigree.
+            </div>
+          </div>
+        </div>
+
+        <!-- Global Settings -->
+        <div class="opt-group">
+          <div class="opt-group-header">
+            <div class="opt-group-header-left"><i class="ti ti-settings"></i><span class="opt-group-title">Chart Options</span></div>
+          </div>
+          <div class="opt-group-body">
+            <div class="field-row">
+              <label>Pedigree Title</label>
+              <input type="text" id="chartTitle" value="" oninput="render()">
+            </div>
+            <div class="grid-2">
+              <div class="toggle-row">
+                <input type="checkbox" id="showGenNums" checked onchange="render()">
+                <label for="showGenNums">Generations (I, II...)</label>
+              </div>
+              <div class="toggle-row">
+                <input type="checkbox" id="showLegend" checked onchange="render()">
+                <label for="showLegend">Pedigree Key</label>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="toggle-row">
+                <input type="checkbox" id="showNumbers" checked onchange="render()">
+                <label for="showNumbers">Auto-Numbering</label>
+              </div>
+              <div class="toggle-row">
+                <input type="checkbox" id="showGenPrefix" onchange="render()">
+                <label for="showGenPrefix">Gen Prefix (II-1)</label>
+              </div>
+            </div>
+            <div class="btn-row" style="justify-content:flex-start; margin-top:10px;">
+              <button class="btn btn-secondary" onclick="loadPreset('nuclear')"><i class="ti ti-template"></i> Sample Tree</button>
+              <button class="btn btn-secondary" onclick="clearTree()"><i class="ti ti-rotate-clockwise"></i> Clear Canvas</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="action-banner">
+          <i class="ti ti-click" style="vertical-align:-1px;"></i> <b>Interactive Building:</b><br>
+          Click an individual on the canvas to select them (highlighted in red). Then use the family action buttons above to add relatives safely.
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL: Stage -->
+      <div class="split-right">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="pedigreeCanvas" width="800" height="520"></canvas>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="downloadPNG()"><i class="ti ti-download"></i> Download PNG</button>
+          <button class="btn btn-green" id="copyBtn" onclick="copyPNG()"><i class="ti ti-copy"></i> Copy to Clipboard</button>
+        </div>
+        <span class="copy-feedback" id="copyFeedback"><i class="ti ti-check"></i> Copied pedigree to clipboard!</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════
+//  DATA STATE (100% UNIFIED STRUCTURAL MODEL)
+// ════════════════════════════════════════════════
+let ped = [];
+let marriages = [];
+let selectedId = null;
+let nextId = 1;
+let nextTwinGroup = 1;
+
+// Metrics
+const NODE_SIZE = 28;
+const HALF_SIZE = NODE_SIZE / 2;
+const GEN_Y_SPACING = 95;
+const SPOUSE_GAP = 32;
+const SIBLING_GAP = 38;
+
+const canvas = document.getElementById('pedigreeCanvas');
+const ctx = canvas.getContext('2d');
+
+/* ════════════════════════════════════════════════
+   STRUCTURAL DATA MODEL
+   ════════════════════════════════════════════════ */
+function createPerson(sex = 1, aff = 1) {
+  return {
+    id: nextId++,
+    sex: sex,
+    aff: aff,
+    genotype: '',
+    customLabel: '',
+    deceased: false,
+    proband: false,
+    twinGroup: null,
+    monozygotic: false,
+    x: 0,
+    y: 0,
+    generation: 0
+  };
+}
+
+function addMarriage(id1, id2) {
+  const m = { id: nextId++, p1: id1, p2: id2, children: [] };
+  marriages.push(m);
+  return m;
+}
+
+function getParentMating(id) {
+  return marriages.find(m => m.children.includes(id));
+}
+
+function getSpousalMatings(id) {
+  return marriages.filter(m => m.p1 === id || m.p2 === id);
+}
+
+/* ════════════════════════════════════════════════
+   EXPLICIT BLOCK-BASED ALIGNMENT ENGINE
+   ════════════════════════════════════════════════ */
+function alignPedigree() {
+  if (!ped.length) return;
+
+  const genMap = new Map();
+  const visitedGen = new Set();
+  
+  // Advanced BFS Traversal to correctly map generations even for in-laws
+  ped.forEach(startNode => {
+    if (visitedGen.has(startNode.id)) return;
+    
+    const comp = [];
+    const q = [ {id: startNode.id, g: 0} ];
+    
+    while (q.length > 0) {
+      const curr = q.shift();
+      if (visitedGen.has(curr.id)) continue;
+      
+      visitedGen.add(curr.id);
+      genMap.set(curr.id, curr.g);
+      comp.push(curr.id);
+
+      // Traversal 1: Spouses (Same Generation)
+      getSpousalMatings(curr.id).forEach(m => {
+        const spId = m.p1 === curr.id ? m.p2 : m.p1;
+        if (!visitedGen.has(spId)) q.push({id: spId, g: curr.g});
+        
+        // Traversal 2: Children (Next Generation)
+        m.children.forEach(cId => {
+          if (!visitedGen.has(cId)) q.push({id: cId, g: curr.g + 1});
+        });
+      });
+
+      // Traversal 3: Parents (Previous Generation)
+      const pMating = getParentMating(curr.id);
+      if (pMating) {
+        if (!visitedGen.has(pMating.p1)) q.push({id: pMating.p1, g: curr.g - 1});
+        if (!visitedGen.has(pMating.p2)) q.push({id: pMating.p2, g: curr.g - 1});
+      }
+    }
+
+    // Shift component so the highest ancestor starts at Generation 0
+    let minG = Infinity;
+    comp.forEach(id => {
+      if (genMap.get(id) < minG) minG = genMap.get(id);
+    });
+    comp.forEach(id => {
+      genMap.set(id, genMap.get(id) - minG);
+    });
+  });
+
+  const posMap = new Map();
+  const visitedLayout = new Set();
+
+  function measureBlock(nodeId) {
+    const matingsList = getSpousalMatings(nodeId);
+    if (!matingsList.length) return NODE_SIZE + SIBLING_GAP;
+
+    let totalW = 0;
+    matingsList.forEach(m => {
+      let cw = 0;
+      m.children.forEach(cId => { cw += measureBlock(cId); });
+      const pairW = (NODE_SIZE * 2) + SPOUSE_GAP + SIBLING_GAP;
+      totalW += Math.max(pairW, cw);
+    });
+    return totalW;
+  }
+
+  function layoutBlock(nodeId, leftX) {
+    if (visitedLayout.has(nodeId)) return 0;
+    visitedLayout.add(nodeId);
+
+    const matingsList = getSpousalMatings(nodeId);
+    if (!matingsList.length) {
+      posMap.set(nodeId, leftX + NODE_SIZE / 2);
+      return NODE_SIZE + SIBLING_GAP;
+    }
+
+    let currentLeft = leftX;
+    matingsList.forEach(m => {
+      const spouseId = m.p1 === nodeId ? m.p2 : m.p1;
+      visitedLayout.add(spouseId);
+
+      let childCursor = currentLeft;
+      const childCenters = [];
+      m.children.forEach(cId => {
+        const cw = layoutBlock(cId, childCursor);
+        if (cw > 0) {
+          childCenters.push(posMap.get(cId));
+          childCursor += cw;
+        }
+      });
+
+      const childrenW = childCursor - currentLeft;
+      const pairW = (NODE_SIZE * 2) + SPOUSE_GAP + SIBLING_GAP;
+      const blockW = Math.max(pairW, childrenW);
+
+      let center = currentLeft + blockW / 2;
+      if (childCenters.length) {
+        center = (childCenters[0] + childCenters[childCenters.length - 1]) / 2;
+      }
+
+      // Preserve Male on Left, Female on Right when possible
+      const p1Node = ped.find(x => x.id === m.p1);
+      if (p1Node.sex === 1 || (p1Node.sex !== 2 && m.p1 === nodeId)) {
+        posMap.set(m.p1, center - (NODE_SIZE + SPOUSE_GAP) / 2);
+        posMap.set(m.p2, center + (NODE_SIZE + SPOUSE_GAP) / 2);
+      } else {
+        posMap.set(m.p2, center - (NODE_SIZE + SPOUSE_GAP) / 2);
+        posMap.set(m.p1, center + (NODE_SIZE + SPOUSE_GAP) / 2);
+      }
+
+      currentLeft += blockW;
+    });
+
+    return currentLeft - leftX;
+  }
+
+  let cursorX = 60;
+  
+  // Layout roots first
+  const roots = ped.filter(p => !getParentMating(p.id));
+  const sortedRoots = roots.sort((a,b) => a.id - b.id);
+  sortedRoots.forEach(r => {
+    if (!visitedLayout.has(r.id)) {
+      const w = layoutBlock(r.id, cursorX);
+      if (w > 0) cursorX += w + SIBLING_GAP;
+    }
+  });
+
+  ped.forEach(p => {
+    if (!visitedLayout.has(p.id)) {
+      const w = layoutBlock(p.id, cursorX);
+      if (w > 0) cursorX += w + SIBLING_GAP;
+    }
+  });
+
+  const startY = 70;
+  ped.forEach(p => {
+    p.y = startY + (genMap.get(p.id) || 0) * GEN_Y_SPACING;
+    p.x = posMap.get(p.id) || 60;
+    p.generation = genMap.get(p.id) || 0;
+  });
+
+  if (ped.length) {
+    const xs = ped.map(n => n.x);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const shift = (canvas.width / 2) - (minX + (maxX - minX) / 2);
+    ped.forEach(n => n.x += shift);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   USER ACTIONS
+   ════════════════════════════════════════════════ */
+function actionAddParents() {
+  if (!selectedId) return;
+  const child = ped.find(x => x.id === selectedId);
+  if (!child || getParentMating(selectedId)) return;
+
+  const father = createPerson(1, 1);
+  const mother = createPerson(2, 1);
+  ped.push(father, mother);
+
+  const m = addMarriage(father.id, mother.id);
+  m.children.push(child.id);
+
+  selectPerson(selectedId);
+  alignPedigree();
+  render();
+}
+
+function actionAddSpouse() {
+  if (!selectedId) return;
+  const p = ped.find(x => x.id === selectedId);
+  if (!p) return;
+
+  const oppSex = p.sex === 1 ? 2 : 1;
+  const spouse = createPerson(oppSex, 1);
+  ped.push(spouse);
+
+  p.sex === 1 ? addMarriage(p.id, spouse.id) : addMarriage(spouse.id, p.id);
+  
+  selectPerson(selectedId);
+  alignPedigree();
+  render();
+}
+
+function actionAddSibling() {
+  if (!selectedId) return;
+  const pMating = getParentMating(selectedId);
+  if (!pMating) return;
+
+  const sib = createPerson(1, 1);
+  ped.push(sib);
+
+  const curIdx = pMating.children.indexOf(selectedId);
+  pMating.children.splice(curIdx + 1, 0, sib.id);
+
+  selectPerson(selectedId);
+  alignPedigree();
+  render();
+}
+
+function actionAddChild(sex) {
+  if (!selectedId) return;
+  const p = ped.find(x => x.id === selectedId);
+  if (!p) return;
+
+  let matingsList = getSpousalMatings(p.id);
+  let mating;
+  
+  if (!matingsList.length) {
+    const oppSex = p.sex === 1 ? 2 : 1;
+    const spouse = createPerson(oppSex, 1);
+    ped.push(spouse);
+    mating = p.sex === 1 ? addMarriage(p.id, spouse.id) : addMarriage(spouse.id, p.id);
+  } else {
+    mating = matingsList[0];
+  }
+
+  const child = createPerson(sex, 1);
+  ped.push(child);
+  mating.children.push(child.id);
+
+  selectPerson(selectedId);
+  alignPedigree();
+  render();
+}
+
+function actionAddTwin(isMono) {
+  if (!selectedId) return;
+  const p = ped.find(x => x.id === selectedId);
+  const pMating = getParentMating(selectedId);
+  if (!p || !pMating) return; 
+  
+  if (!p.twinGroup) {
+    p.twinGroup = nextTwinGroup++;
+    p.monozygotic = isMono;
+  }
+  
+  const twin = createPerson(p.sex, 1);
+  ped.push(twin);
+  twin.twinGroup = p.twinGroup;
+  twin.monozygotic = isMono;
+  
+  const curIdx = pMating.children.indexOf(p.id);
+  pMating.children.splice(curIdx + 1, 0, twin.id);
+  
+  selectPerson(selectedId);
+  alignPedigree();
+  render();
+}
+
+function actionShiftOrder(dir) {
+  if (!selectedId) return;
+  const pMating = getParentMating(selectedId);
+  if (!pMating) return;
+
+  const idx = pMating.children.indexOf(selectedId);
+  const targetIdx = idx + dir;
+
+  if (targetIdx >= 0 && targetIdx < pMating.children.length) {
+    const swap = pMating.children[targetIdx];
+    pMating.children[targetIdx] = selectedId;
+    pMating.children[idx] = swap;
+    alignPedigree();
+    render();
+  }
+}
+
+function actionDeleteSelected() {
+  if (!selectedId) return;
+  const id = selectedId;
+  
+  const idsToDelete = new Set([id]);
+  
+  // 1. Cascade down
+  let size;
+  do {
+    size = idsToDelete.size;
+    marriages.forEach(m => {
+      if (idsToDelete.has(m.p1) || idsToDelete.has(m.p2)) {
+        m.children.forEach(c => idsToDelete.add(c));
+      }
+    });
+  } while (idsToDelete.size > size);
+
+  // 2. Cleanup orphaned in-laws safely
+  marriages.forEach(m => {
+    if (idsToDelete.has(m.p1) && !idsToDelete.has(m.p2)) {
+       const hasOtherBonds = marriages.some(om => (om.p1 === m.p2 || om.p2 === m.p2) && om.id !== m.id);
+       const isChild = !!getParentMating(m.p2);
+       if (!hasOtherBonds && !isChild) idsToDelete.add(m.p2);
+    } else if (idsToDelete.has(m.p2) && !idsToDelete.has(m.p1)) {
+       const hasOtherBonds = marriages.some(om => (om.p1 === m.p1 || om.p2 === m.p1) && om.id !== m.id);
+       const isChild = !!getParentMating(m.p1);
+       if (!hasOtherBonds && !isChild) idsToDelete.add(m.p1);
+    }
+  });
+
+  ped = ped.filter(p => !idsToDelete.has(p.id));
+  marriages = marriages.filter(m => !idsToDelete.has(m.p1) && !idsToDelete.has(m.p2));
+  marriages.forEach(m => {
+     m.children = m.children.filter(c => !idsToDelete.has(c));
+  });
+  
+  if (ped.length === 0) {
+    ped = [createPerson(1, 1)];
+  }
+
+  selectPerson(null);
+  alignPedigree();
+  render();
+}
+
+function updateInspectorVisuals(p) {
+  document.querySelectorAll('#sexPicker .vp-btn').forEach(b => {
+    b.classList.toggle('selected', parseInt(b.dataset.val) === p.sex);
+  });
+  document.querySelectorAll('#statusPicker .vp-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.val === String(p.aff));
+  });
+}
+
+function setNodeSex(sex) {
+  if (!selectedId) return;
+  const p = ped.find(x => x.id === selectedId);
+  if (p) {
+    p.sex = parseInt(sex);
+    updateInspectorVisuals(p);
+    alignPedigree();
+    render();
+  }
+}
+
+function setNodeStatus(aff) {
+  if (!selectedId) return;
+  const p = ped.find(x => x.id === selectedId);
+  if (p) {
+    p.aff = (aff === 'carrier' || aff === 'carrier_dot') ? aff : parseInt(aff);
+    updateInspectorVisuals(p);
+    alignPedigree();
+    render();
+  }
+}
+
+function selectPerson(id) {
+  selectedId = id;
+  const insp = document.getElementById('inspector-content');
+  const empty = document.getElementById('inspector-empty');
+  const allBtns = ['btnAddParents','btnAddSpouse','btnAddSibling','btnAddSon','btnAddDaughter','btnAddUnknown','btnAddIdentTwin','btnAddFratTwin','btnDeleteMember','btnShiftLeft','btnShiftRight'];
+
+  if (!id) {
+    insp.style.display = 'none';
+    empty.style.display = 'block';
+    allBtns.forEach(b => document.getElementById(b).disabled = true);
+    render();
+    return;
+  }
+
+  const p = ped.find(x => x.id === id);
+  if (!p) return;
+
+  insp.style.display = 'block';
+  empty.style.display = 'none';
+  allBtns.forEach(b => document.getElementById(b).disabled = false);
+
+  updateInspectorVisuals(p);
+
+  document.getElementById('nodeGenotype').value = p.genotype || '';
+  document.getElementById('nodeCustomLabel').value = p.customLabel || '';
+  document.getElementById('nodeDeceased').checked = !!p.deceased;
+  document.getElementById('nodeProband').checked = !!p.proband;
+
+  const hasParents = !!getParentMating(id);
+  document.getElementById('btnAddParents').disabled = hasParents;
+  document.getElementById('btnAddSibling').disabled = !hasParents;
+  document.getElementById('btnShiftLeft').disabled = !hasParents;
+  document.getElementById('btnShiftRight').disabled = !hasParents;
+  document.getElementById('btnAddFratTwin').disabled = !hasParents;
+  document.getElementById('btnAddIdentTwin').disabled = !hasParents;
+
+  render();
+}
+
+function updateSelectedAttributes() {
+  if (!selectedId) return;
+  const p = ped.find(x => x.id === selectedId);
+  if (!p) return;
+
+  p.genotype = document.getElementById('nodeGenotype').value.trim();
+  p.customLabel = document.getElementById('nodeCustomLabel').value.trim();
+  p.deceased = document.getElementById('nodeDeceased').checked;
+  p.proband = document.getElementById('nodeProband').checked;
+  alignPedigree();
+  render();
+}
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top) * scaleY;
+
+  const hit = ped.find(n => Math.hypot((n.x || 0) - mx, (n.y || 0) - my) <= NODE_SIZE * 0.85);
+  selectPerson(hit ? hit.id : null);
+});
+
+/* ════════════════════════════════════════════════
+   CANVAS RENDERING
+   ════════════════════════════════════════════════ */
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const title = document.getElementById('chartTitle').value.trim();
+  if (title) {
+    ctx.font = 'bold 15px Georgia, "Times New Roman", serif';
+    ctx.fillStyle = '#1e2a3a';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, canvas.width / 2, 26);
+  }
+
+  const showGenNums = document.getElementById('showGenNums').checked;
+  const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+
+  if (showGenNums && ped.length) {
+    const sortedY = [...new Set(ped.map(n => n.y || 0))].sort((a, b) => a - b);
+    ctx.font = 'bold 13px Georgia, serif';
+    ctx.fillStyle = '#64748b';
+    ctx.textAlign = 'left';
+    sortedY.forEach((y, i) => {
+      ctx.fillText(roman[i] || (i + 1), 22, y + 5);
+    });
+  }
+
+  // 1. Draw Marriages & Branching Drops
+  marriages.forEach(m => {
+    const p1 = ped.find(n => n.id === m.p1);
+    const p2 = ped.find(n => n.id === m.p2);
+    if (!p1 || !p2) return;
+
+    ctx.strokeStyle = '#1e2a3a';
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+
+    const midX = (p1.x + p2.x) / 2;
+    const midY = (p1.y + p2.y) / 2;
+
+    if (m.children.length) {
+      const stemY = midY + 34;
+      const cNodes = m.children.map(cId => ped.find(n => n.id === cId)).filter(Boolean);
+
+      ctx.beginPath();
+      ctx.moveTo(midX, midY);
+      ctx.lineTo(midX, stemY);
+      ctx.stroke();
+
+      const normalKids = cNodes.filter(c => !c.twinGroup);
+      const twinKids = cNodes.filter(c => c.twinGroup);
+
+      const twinGroups = {};
+      twinKids.forEach(c => {
+        if (!twinGroups[c.twinGroup]) twinGroups[c.twinGroup] = [];
+        twinGroups[c.twinGroup].push(c);
+      });
+
+      let childPoints = normalKids.map(c => c.x);
+      Object.values(twinGroups).forEach(group => {
+         const grpMin = Math.min(...group.map(c => c.x));
+         const grpMax = Math.max(...group.map(c => c.x));
+         childPoints.push((grpMin + grpMax) / 2);
+      });
+
+      if (childPoints.length > 0) {
+         const minChildX = Math.min(midX, ...childPoints);
+         const maxChildX = Math.max(midX, ...childPoints);
+         ctx.beginPath();
+         ctx.moveTo(minChildX, stemY);
+         ctx.lineTo(maxChildX, stemY);
+         ctx.stroke();
+      }
+
+      normalKids.forEach(c => {
+        ctx.beginPath();
+        ctx.moveTo(c.x, stemY);
+        ctx.lineTo(c.x, c.y - HALF_SIZE);
+        ctx.stroke();
+      });
+
+      Object.values(twinGroups).forEach(group => {
+        if (group.length === 1) {
+          ctx.beginPath();
+          ctx.moveTo(group[0].x, stemY);
+          ctx.lineTo(group[0].x, group[0].y - HALF_SIZE);
+          ctx.stroke();
+          return;
+        }
+
+        const grpMin = Math.min(...group.map(c => c.x));
+        const grpMax = Math.max(...group.map(c => c.x));
+        const tMidX = (grpMin + grpMax) / 2;
+        const branchY = stemY + 12;
+
+        ctx.beginPath();
+        ctx.moveTo(tMidX, stemY);
+        ctx.lineTo(tMidX, branchY);
+        ctx.stroke();
+
+        group.forEach(c => {
+          ctx.beginPath();
+          ctx.moveTo(tMidX, branchY);
+          ctx.lineTo(c.x, c.y - HALF_SIZE);
+          ctx.stroke();
+        });
+
+        if (group[0].monozygotic) {
+           const monoY = stemY + 25;
+           const cTopY = group[0].y - HALF_SIZE;
+           const tRatio = (monoY - branchY) / (cTopY - branchY);
+           const x1 = tMidX + tRatio * (group[0].x - tMidX);
+           const x2 = tMidX + tRatio * (group[group.length - 1].x - tMidX);
+           
+           ctx.beginPath();
+           ctx.moveTo(x1, monoY);
+           ctx.lineTo(x2, monoY);
+           ctx.stroke();
+        }
+      });
+    }
+
+    ctx.save();
+    ctx.fillStyle = '#3266ad';
+    ctx.beginPath();
+    ctx.arc(midX, midY, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // 2. Numbering
+  if (document.getElementById('showNumbers').checked) {
+    const rows = {};
+    ped.forEach(n => {
+      const yKey = Math.round(n.y || 0);
+      if (!rows[yKey]) rows[yKey] = [];
+      rows[yKey].push(n);
+    });
+    Object.values(rows).forEach(row => {
+      row.sort((a, b) => (a.x || 0) - (b.x || 0)).forEach((n, idx) => {
+        n.computedIndex = idx + 1;
+      });
+    });
+  }
+
+  const showGenPrefix = document.getElementById('showGenPrefix').checked;
+
+  // 3. Draw Individuals
+  ped.forEach(n => {
+    drawIndividual(n, n.id === selectedId, showGenPrefix, roman);
+  });
+
+  // 4. Legend
+  if (document.getElementById('showLegend').checked) {
+    drawLegendBox();
+  }
+}
+
+function drawIndividual(n, isSelected, showGenPrefix, roman) {
+  if (n.x === undefined || n.y === undefined) return;
+  
+  ctx.save();
+
+  if (isSelected) {
+    ctx.strokeStyle = '#d32f2f';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeRect(n.x - HALF_SIZE - 4, n.y - HALF_SIZE - 4, NODE_SIZE + 8, NODE_SIZE + 8);
+    ctx.setLineDash([]);
+  }
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#1e2a3a';
+  ctx.fillStyle = '#ffffff';
+
+  if (n.sex === 1) { // Male
+    ctx.fillRect(n.x - HALF_SIZE, n.y - HALF_SIZE, NODE_SIZE, NODE_SIZE);
+    ctx.strokeRect(n.x - HALF_SIZE, n.y - HALF_SIZE, NODE_SIZE, NODE_SIZE);
+  } else if (n.sex === 2) { // Female
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, HALF_SIZE, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else if (n.sex === 3) { // Termination
+    const tr = HALF_SIZE * 0.8;
+    ctx.beginPath();
+    ctx.moveTo(n.x, n.y - tr);
+    ctx.lineTo(n.x + tr, n.y + tr);
+    ctx.lineTo(n.x - tr, n.y + tr);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  } else { // Unknown
+    ctx.beginPath();
+    ctx.moveTo(n.x, n.y - HALF_SIZE);
+    ctx.lineTo(n.x + HALF_SIZE, n.y);
+    ctx.lineTo(n.x, n.y + HALF_SIZE);
+    ctx.lineTo(n.x - HALF_SIZE, n.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  if (n.aff === 2) {
+    ctx.fillStyle = '#1e2a3a';
+    if (n.sex === 1) ctx.fillRect(n.x - HALF_SIZE, n.y - HALF_SIZE, NODE_SIZE, NODE_SIZE);
+    else if (n.sex === 2) { ctx.beginPath(); ctx.arc(n.x, n.y, HALF_SIZE, 0, Math.PI * 2); ctx.fill(); }
+    else if (n.sex === 3) { 
+      const tr = HALF_SIZE * 0.8;
+      ctx.beginPath(); ctx.moveTo(n.x, n.y - tr); ctx.lineTo(n.x + tr, n.y + tr); ctx.lineTo(n.x - tr, n.y + tr); ctx.closePath(); ctx.fill(); 
+    }
+    else { ctx.beginPath(); ctx.moveTo(n.x, n.y - HALF_SIZE); ctx.lineTo(n.x + HALF_SIZE, n.y); ctx.lineTo(n.x, n.y + HALF_SIZE); ctx.lineTo(n.x - HALF_SIZE, n.y); ctx.closePath(); ctx.fill(); }
+  } else if (n.aff === 'carrier') {
+    ctx.fillStyle = '#1e2a3a';
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(n.x - HALF_SIZE, n.y - HALF_SIZE, HALF_SIZE, NODE_SIZE);
+    ctx.clip();
+    if (n.sex === 1) ctx.fillRect(n.x - HALF_SIZE, n.y - HALF_SIZE, NODE_SIZE, NODE_SIZE);
+    else if (n.sex === 2) { ctx.beginPath(); ctx.arc(n.x, n.y, HALF_SIZE, 0, Math.PI * 2); ctx.fill(); }
+    else if (n.sex === 3) {
+      const tr = HALF_SIZE * 0.8;
+      ctx.beginPath(); ctx.moveTo(n.x, n.y - tr); ctx.lineTo(n.x + tr, n.y + tr); ctx.lineTo(n.x - tr, n.y + tr); ctx.closePath(); ctx.fill(); 
+    }
+    ctx.restore();
+  } else if (n.aff === 'carrier_dot') {
+    ctx.fillStyle = '#1e2a3a';
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  if (n.deceased) {
+    ctx.strokeStyle = '#1e2a3a';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(n.x - HALF_SIZE - 3, n.y + HALF_SIZE + 3);
+    ctx.lineTo(n.x + HALF_SIZE + 3, n.y - HALF_SIZE - 3);
+    ctx.stroke();
+  }
+
+  if (n.proband) {
+    ctx.strokeStyle = '#1e2a3a';
+    ctx.fillStyle = '#1e2a3a';
+    ctx.lineWidth = 1.8;
+    const ax = n.x - HALF_SIZE - 10;
+    const ay = n.y + HALF_SIZE + 10;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(n.x - HALF_SIZE - 2, n.y + HALF_SIZE + 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(n.x - HALF_SIZE - 2, n.y + HALF_SIZE + 2);
+    ctx.lineTo(n.x - HALF_SIZE - 7, n.y + HALF_SIZE + 1);
+    ctx.lineTo(n.x - HALF_SIZE - 1, n.y + HALF_SIZE + 7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.font = 'bold 8.5px Arial';
+    ctx.fillText('P', ax - 6, ay + 4);
+  }
+
+  let autoLabel = n.computedIndex ? String(n.computedIndex) : '';
+  if (autoLabel && showGenPrefix) {
+    const genStr = roman[n.generation] || (n.generation + 1);
+    autoLabel = `${genStr}-${autoLabel}`;
+  }
+
+  const label = n.customLabel || autoLabel;
+
+  if (label) {
+    ctx.fillStyle = '#1e2a3a';
+    ctx.font = '10px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, n.x, n.y + HALF_SIZE + 11);
+  }
+
+  if (n.genotype) {
+    ctx.fillStyle = '#334155';
+    ctx.font = 'italic 9.5px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(n.genotype, n.x, n.y + HALF_SIZE + (label ? 23 : 12));
+  }
+
+  ctx.restore();
+}
+
+function drawLegendBox() {
+  const kx = canvas.width - 145;
+  const ky = canvas.height - 115;
+  const kw = 130;
+  const kh = 100;
+
+  ctx.save();
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(kx, ky, kw, kh);
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(kx, ky, kw, kh);
+
+  ctx.fillStyle = '#475569';
+  ctx.font = 'bold 8.5px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('KEY', kx + 8, ky + 12);
+
+  const drawItem = (x, y, sex, aff, text) => {
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#1e2a3a';
+    ctx.fillStyle = '#fff';
+    if (sex === 1) {
+      ctx.strokeRect(x - 4.5, y - 4.5, 9, 9);
+      if (aff === 2) { ctx.fillStyle = '#1e2a3a'; ctx.fillRect(x - 4.5, y - 4.5, 9, 9); }
+    } else {
+      ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      if (aff === 2) { ctx.fillStyle = '#1e2a3a'; ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill(); }
+      if (aff === 'carrier') { ctx.fillStyle = '#1e2a3a'; ctx.beginPath(); ctx.arc(x, y, 4.5, Math.PI/2, Math.PI*1.5); ctx.fill(); }
+    }
+    ctx.fillStyle = '#334155';
+    ctx.font = '8.5px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(text, x + 8, y + 3);
+  };
+
+  drawItem(kx + 10, ky + 26, 1, 1, 'Male');
+  drawItem(kx + 68, ky + 26, 2, 1, 'Female');
+  drawItem(kx + 10, ky + 45, 1, 2, 'Affected');
+  drawItem(kx + 68, ky + 45, 2, 2, 'Affected');
+  drawItem(kx + 10, ky + 64, 2, 'carrier', 'Carrier');
+  drawItem(kx + 68, ky + 64, 2, 1, 'Unaffected');
+
+  ctx.strokeStyle = '#1e2a3a'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(kx + 8, ky + 83); ctx.lineTo(kx + 24, ky + 83); ctx.stroke();
+  ctx.fillStyle = '#334155'; ctx.fillText('Mating', kx + 30, ky + 86);
+
+  ctx.restore();
+}
+
+/* ════════════════════════════════════════════════
+   PRESET LOADERS
+   ════════════════════════════════════════════════ */
+function loadPreset(name) {
+  nextId = 1;
+  ped = [];
+  marriages = [];
+  selectedId = null;
+
+  if (name === 'trio') {
+    const f = createPerson(1, 1);
+    const m = createPerson(2, 1);
+    ped.push(f, m);
+    const marr = addMarriage(f.id, m.id);
+
+    const c = createPerson(1, 2);
+    ped.push(c);
+    marr.children.push(c.id);
+  } else if (name === 'nuclear') {
+    const f = createPerson(1, 1);
+    const m = createPerson(2, 1);
+    ped.push(f, m);
+    const m1 = addMarriage(f.id, m.id);
+
+    const c1 = createPerson(2, 1);
+    ped.push(c1);
+    m1.children.push(c1.id);
+  } else if (name === 'threegen') {
+    const f = createPerson(1, 2);
+    const m = createPerson(2, 1);
+    ped.push(f, m);
+    const m1 = addMarriage(f.id, m.id);
+
+    const c1 = createPerson(1, 2);
+    const c2 = createPerson(2, 1);
+    ped.push(c1, c2);
+    m1.children.push(c1.id, c2.id);
+
+    const sp = createPerson(2, 1);
+    ped.push(sp);
+    const m2 = addMarriage(c1.id, sp.id);
+
+    const g1 = createPerson(1, 2);
+    const g2 = createPerson(2, 1);
+    ped.push(g1, g2);
+    m2.children.push(g1.id, g2.id);
+  } else {
+    ped = [createPerson(1, 1)];
+  }
+
+  selectPerson(null);
+  alignPedigree();
+  render();
+}
+
+function clearTree() {
+  if (!confirm('Clear pedigree and start from a single individual?')) return;
+  loadPreset('empty');
+}
+
+function getTimestamp() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+function downloadPNG() {
+  const a = document.createElement('a');
+  a.download = `Pedigree_${getTimestamp()}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+async function copyPNG() {
+  const btn = document.getElementById('copyBtn');
+  const fb = document.getElementById('copyFeedback');
+  try {
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png');
+    });
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      fb.style.display = 'inline-flex';
+      btn.style.background = '#145e2c';
+      setTimeout(() => {
+        fb.style.display = 'none';
+        btn.style.background = '#1a7a3a';
+      }, 2500);
+      return;
+    }
+    throw new Error('Clipboard API unavailable');
+  } catch (err) {
+    downloadPNG();
+  }
+}
+
+window.onload = () => {
+  loadPreset('nuclear');
+};
+</script>
+</body>
+</html>
