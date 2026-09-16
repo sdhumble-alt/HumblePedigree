@@ -2,101 +2,511 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>A Humble Pedigree</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/webfont/tabler-icons.min.css">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:11pt;background:#f0f2f5;color:#1e2a3a;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
-#app{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;background:#fff;}
+/* ════════════════════════════════════════════════
+   DESIGN TOKENS & CSS VARIABLES
+   ════════════════════════════════════════════════ */
+:root {
+  /* Brand & Shell Colors */
+  --header-bg: #1e2a3a;
+  --header-border: #12202e;
+  --header-title: #ffffff;
+  --header-sub: rgba(255, 255, 255, 0.65);
+  --header-ver: rgba(255, 255, 255, 0.45);
+
+  /* Page Canvas & Panel Backgrounds */
+  --app-window-bg: #f0f2f5;
+  --app-panel-bg: #ffffff;
+  --stage-bg: #f9fafc;
+
+  /* Card & Border Accents */
+  --card-border: #cbd5e1;
+  --card-header-bg: #f8fafc;
+  --card-header-border: #e2e8f0;
+  --card-header-title: #475569;
+  --card-header-icon: #64748b;
+
+  /* Form Elements */
+  --input-border: #cbd5e1;
+  --input-border-hover: #94a3b8;
+  --input-border-focus: #3266ad;
+  --input-focus-ring: rgba(50, 102, 173, 0.15);
+  --input-text: #1e2a3a;
+  --input-label: #475569;
+
+  /* Standard Action Buttons */
+  --btn-primary-bg: #3266ad;
+  --btn-primary-hover: #185fa5;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-border: #cbd5e1;
+  --btn-secondary-hover-bg: #f1f5f9;
+  --btn-secondary-hover-border: #94a3b8;
+  --btn-secondary-text: #334155;
+
+  --btn-green-bg: #1a7a3a;
+  --btn-green-hover: #145e2c;
+  --btn-green-text: #ffffff;
+
+  --btn-danger-bg: #b00020;
+  --btn-danger-hover: #8e001a;
+  --btn-danger-text: #ffffff;
+
+  /* Layout Spacing */
+  --sidebar-min-width: 340px;
+  --sidebar-max-width: 380px;
+  --split-gap: 18px;
+  --split-padding: 16px;
+}
+
+/* Reset & Viewport Lock */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  font-size: 11pt;
+  background: var(--app-window-bg);
+  color: var(--input-text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--app-panel-bg);
+}
 
 /* Top Header */
-#app-header{background:#1e2a3a;padding:9px 16px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #12202e;}
-.header-titles{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;}
-#app-title{font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:bold;color:#fff;letter-spacing:0.01em;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
-#app-subtitle{font-size:10px;color:rgba(255,255,255,0.65);font-style:italic;white-space:nowrap;line-height:1.2;margin:0;padding:0;}
-.toolbar-ver{font-size:8pt;color:rgba(255,255,255,0.4);font-family:Arial,sans-serif;white-space:nowrap;margin-left:16px;}
+#app-header {
+  background: var(--header-bg);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--header-border);
+}
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+}
+#app-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--header-title);
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+#app-title i {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.9);
+}
+#app-subtitle {
+  font-size: 10px;
+  color: var(--header-sub);
+  font-style: italic;
+  white-space: nowrap;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+}
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toolbar-ver {
+  font-size: 8pt;
+  color: var(--header-ver);
+  font-family: Arial, sans-serif;
+  white-space: nowrap;
+  margin-left: 6px;
+  letter-spacing: 0.02em;
+}
+
+/* Header Action Buttons */
+.hdr-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 4px 9px;
+  font-size: 8.5pt;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.12s;
+}
+.hdr-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.hdr-btn i {
+  font-size: 13px;
+}
 
 /* Split Layout */
-.content{display:flex;flex:1;overflow:hidden;}
-.split-layout{display:grid;grid-template-columns:minmax(330px,360px) 1fr;gap:18px;height:100%;width:100%;overflow:hidden;align-items:stretch;padding:16px;}
-.split-left{height:100%;overflow-y:auto;padding-right:6px;}
-.split-right{height:100%;overflow-y:auto;background:#f9fafc;border:1px solid #d0d7e2;border-radius:8px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;}
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.split-layout {
+  display: grid;
+  grid-template-columns: minmax(var(--sidebar-min-width), var(--sidebar-max-width)) 1fr;
+  gap: var(--split-gap);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  align-items: stretch;
+  padding: var(--split-padding);
+}
+.split-left {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.split-right {
+  height: 100%;
+  overflow-y: auto;
+  background: var(--stage-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+}
 
 /* Cards & Option Groups */
-.opt-group{border:1px solid #bbbbbb;border-radius:8px;margin-bottom:14px;overflow:hidden;background:#ffffff;}
-.opt-group-header{background:#f5f5f5;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #cccccc;}
-.opt-group-header-left{display:flex;align-items:center;gap:6px;}
-.opt-group-header i{font-size:14px;color:#666;}
-.opt-group-title{font-size:9pt;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;}
-.opt-group-body{padding:12px;}
+.opt-group {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  background: var(--app-panel-bg);
+}
+.opt-group-header {
+  background: var(--card-header-bg);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--card-header-border);
+}
+.opt-group-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.opt-group-header i {
+  font-size: 14px;
+  color: var(--card-header-icon);
+}
+.opt-group-title {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--card-header-title);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.opt-group-body {
+  padding: 12px;
+}
 
-/* Action Buttons */
-.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
-.act-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 4px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:6px;cursor:pointer;font-size:8pt;font-weight:600;color:#334155;transition:all .12s;text-align:center;}
-.act-btn:hover:not(:disabled){background:#eef3fb;border-color:#3266ad;color:#1e429f;}
-.act-btn:disabled{opacity:0.4;cursor:not-allowed;}
-.act-btn i{font-size:16px;}
+/* Action Button Tiles */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.act-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: #f8fafc;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 8.5pt;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  color: #334155;
+  transition: all .12s ease-in-out;
+  text-align: center;
+}
+.act-btn:hover:not(:disabled) {
+  background: #eef3fb;
+  border-color: var(--btn-primary-bg);
+  color: #1e429f;
+}
+.act-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.act-btn i {
+  font-size: 17px;
+}
+.act-btn.delete-act {
+  color: var(--btn-danger-bg);
+  border-color: #f0c0c8;
+}
+.act-btn.delete-act:hover:not(:disabled) {
+  background: #fdf2f2;
+  border-color: var(--btn-danger-bg);
+  color: var(--btn-danger-hover);
+}
 
 /* Inputs & Form Elements */
-input[type=text],select{border:1.5px solid #aaaaaa;border-radius:6px;padding:6px 9px;font-size:10pt;font-family:Arial,sans-serif;background:#ffffff;color:#222222;outline:none;transition:border-color .15s,box-shadow .15s;min-width:0;width:100%;box-sizing:border-box;}
-input[type=text]:hover,select:hover{border-color:#777777;}
-input[type=text]:focus,select:focus{border-color:#3266ad;border-width:2px;box-shadow:0 0 0 3px rgba(50,102,173,0.15);}
-.field-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
-.field-row label{font-size:9.5pt;color:#555555;font-weight:600;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.toggle-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
-.toggle-row label{font-size:10pt;color:#222;cursor:pointer;}
-input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:#3266ad;}
+input[type=text],
+input[type=number],
+select {
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: var(--input-text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+input[type=text]:hover,
+input[type=number]:hover,
+select:hover {
+  border-color: var(--input-border-hover);
+}
+input[type=text]:focus,
+input[type=number]:focus,
+select:focus {
+  border-color: var(--input-border-focus);
+  border-width: 2px;
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.field-row label {
+  font-size: 9.5pt;
+  color: var(--input-label);
+  font-weight: 600;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+.toggle-row label {
+  font-size: 10pt;
+  color: var(--input-text);
+  cursor: pointer;
+  user-select: none;
+}
+input[type=checkbox] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: var(--btn-primary-bg);
+}
 
-/* Visual Selection Boxes */
-.visual-picker{display:flex;gap:4px;}
-.vp-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #cbd5e1;border-radius:6px;cursor:pointer;transition:all .1s;padding:0;}
-.vp-btn:hover{border-color:#94a3b8;background:#f8fafc;}
-.vp-btn.selected{border-color:#3266ad;background:#eef3fb;box-shadow:0 0 0 2px rgba(50,102,173,0.15);}
-.vp-btn svg{width:20px;height:20px;}
+/* Visual Selection Pickers */
+.visual-picker {
+  display: flex;
+  gap: 6px;
+}
+.vp-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .12s;
+  padding: 0;
+}
+.vp-btn:hover {
+  border-color: var(--input-border-hover);
+  background: #f8fafc;
+}
+.vp-btn.selected {
+  border-color: var(--btn-primary-bg);
+  background: #eef3fb;
+  box-shadow: 0 0 0 2px var(--input-focus-ring);
+}
+.vp-btn svg {
+  width: 20px;
+  height: 20px;
+}
 
-/* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;border-radius:6px;padding:6px 12px;font-size:9.5pt;font-family:Arial,sans-serif;font-weight:600;cursor:pointer;transition:all .12s;border:none;}
-.btn-primary{background:#3266ad;color:#fff;}
-.btn-primary:hover{background:#185fa5;}
-.btn-secondary{background:#ffffff;color:#333;border:1.5px solid #aaaaaa;}
-.btn-secondary:hover{background:#f0f0f0;border-color:#777;}
-.btn-green{background:#1a7a3a;color:#fff;}
-.btn-green:hover{background:#145e2c;}
-.btn-danger{background:#b00020;color:#fff;}
-.btn-danger:hover{background:#8e001a;}
-.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;justify-content:center;}
+/* Standardized Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 9.5pt;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .12s ease-in-out;
+  border: none;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary { background: var(--btn-primary-bg); color: var(--btn-primary-text); }
+.btn-primary:hover:not(:disabled) { background: var(--btn-primary-hover); }
 
-/* Canvas Stage */
-.canvas-wrapper{position:relative;background:#ffffff;border:1px solid #d0d7e2;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05);overflow:hidden;}
-#pedigreeCanvas{display:block;cursor:pointer;}
-.copy-feedback{font-size:9.5pt;color:#2e7d32;font-weight:600;display:none;align-items:center;gap:4px;margin-top:4px;}
-.action-banner{background:#e8f0fe;border:1px solid #c2dbfe;border-radius:6px;padding:8px 10px;font-size:8.5pt;color:#1e429f;margin-bottom:12px;line-height:1.4;}
+.btn-secondary { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border: 1.5px solid var(--btn-secondary-border); }
+.btn-secondary:hover:not(:disabled) { background: var(--btn-secondary-hover-bg); border-color: var(--btn-secondary-hover-border); }
+
+.btn-green { background: var(--btn-green-bg); color: var(--btn-green-text); }
+.btn-green:hover:not(:disabled) { background: var(--btn-green-hover); }
+
+.btn-danger { background: var(--btn-danger-bg); color: var(--btn-danger-text); }
+.btn-danger:hover:not(:disabled) { background: var(--btn-danger-hover); }
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Canvas Stage & Export Tray */
+.canvas-wrapper {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#pedigreeCanvas {
+  display: block;
+  cursor: pointer;
+}
+.export-tray {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+}
+.feedback-row {
+  min-height: 22px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.copy-feedback {
+  font-size: 9.5pt;
+  color: var(--btn-green-bg);
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.action-banner {
+  background: #e8f0fe;
+  border: 1px solid #c2dbfe;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 8.5pt;
+  color: #1e429f;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- TOP HEADER -->
-  <div id="app-header">
-    <div class="header-titles">
-      <div id="app-title">A Humble Pedigree</div>
-      <div id="app-subtitle">Simple Pedigree Engine - Build by Steven Humble</div>
-    </div>
-    <span class="toolbar-ver">V 1.0.0.</span>
-  </div>
+  <!-- Hidden File Input for Opening Saved Trees -->
+  <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="handleFileSelect(event)">
 
-  <!-- SPLIT CONTENT -->
-  <div class="content">
+  <!-- TOP HEADER -->
+  <header id="app-header">
+    <div class="header-titles">
+      <div id="app-title"><i class="ti ti-binary-tree"></i> A Humble Pedigree</div>
+      <div id="app-subtitle">Simple Pedigree Engine &mdash; Built by Steven Humble</div>
+    </div>
+    <div class="toolbar-right">
+      <button class="hdr-btn" onclick="saveTreeJSON()" title="Save Tree to JSON File"><i class="ti ti-device-floppy"></i> Save</button>
+      <button class="hdr-btn" onclick="document.getElementById('fileInput').click()" title="Open JSON File"><i class="ti ti-folder-open"></i> Open</button>
+      <div class="toolbar-ver">V 1.1.0 &mdash; 2026-09-16</div>
+    </div>
+  </header>
+
+  <!-- SPLIT CONTENT BODY -->
+  <main class="content">
     <div class="split-layout">
       
-      <!-- LEFT PANEL -->
-      <div class="split-left" id="controls-panel">
+      <!-- LEFT PANEL: CONTROLS -->
+      <aside class="split-left" id="controls-panel">
 
         <!-- Relative Actions -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-user-plus"></i><span class="opt-group-title">Family Actions</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-user-plus"></i>
+              <span class="opt-group-title">Family Actions</span>
+            </div>
           </div>
           <div class="opt-group-body">
             <div class="action-grid">
@@ -110,7 +520,7 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-
 
               <button class="act-btn" id="btnAddIdentTwin" onclick="actionAddTwin(true)" disabled><i class="ti ti-vector-triangle"></i> Identical Twin</button>
               <button class="act-btn" id="btnAddFratTwin" onclick="actionAddTwin(false)" disabled><i class="ti ti-vector-bezier"></i> Frat. Twin</button>
-              <button class="act-btn" id="btnDeleteMember" onclick="actionDeleteSelected()" disabled style="color:#b00020; border-color:#e2b0b0;"><i class="ti ti-trash"></i> Delete</button>
+              <button class="act-btn delete-act" id="btnDeleteMember" onclick="actionDeleteSelected()" disabled><i class="ti ti-trash"></i> Delete</button>
             </div>
             <div class="grid-2">
               <button class="btn btn-secondary" onclick="actionShiftOrder(-1)" id="btnShiftLeft" disabled><i class="ti ti-arrow-left"></i> Shift Left</button>
@@ -122,7 +532,10 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-
         <!-- Selected Node Inspector -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-adjustments"></i><span class="opt-group-title">Individual Attributes</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-adjustments"></i>
+              <span class="opt-group-title">Individual Attributes</span>
+            </div>
           </div>
           <div class="opt-group-body">
             <div id="inspector-content" style="display:none;">
@@ -167,11 +580,11 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-
               <div class="grid-2">
                 <div class="field-row">
                   <label>Genotype / Text</label>
-                  <input type="text" id="nodeGenotype" placeholder="" oninput="updateSelectedAttributes()">
+                  <input type="text" id="nodeGenotype" placeholder="e.g. Aa, XbY" oninput="updateSelectedAttributes()">
                 </div>
                 <div class="field-row">
                   <label>Custom ID / Name</label>
-                  <input type="text" id="nodeCustomLabel" placeholder="" oninput="updateSelectedAttributes()">
+                  <input type="text" id="nodeCustomLabel" placeholder="e.g. John" oninput="updateSelectedAttributes()">
                 </div>
               </div>
 
@@ -186,21 +599,24 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-
                 </div>
               </div>
             </div>
-            <div id="inspector-empty" style="color:#777; font-size:9.5pt; font-style:italic; text-align:center; padding:10px 0;">
+            <div id="inspector-empty" style="color:var(--card-header-icon); font-size:9.5pt; font-style:italic; text-align:center; padding:10px 0;">
               No individual selected. Click anyone in the pedigree.
             </div>
           </div>
         </div>
 
-        <!-- Global Settings -->
+        <!-- Global Chart Settings -->
         <div class="opt-group">
           <div class="opt-group-header">
-            <div class="opt-group-header-left"><i class="ti ti-settings"></i><span class="opt-group-title">Chart Options</span></div>
+            <div class="opt-group-header-left">
+              <i class="ti ti-settings"></i>
+              <span class="opt-group-title">Chart Options</span>
+            </div>
           </div>
           <div class="opt-group-body">
             <div class="field-row">
               <label>Pedigree Title</label>
-              <input type="text" id="chartTitle" value="" oninput="render()">
+              <input type="text" id="chartTitle" placeholder="e.g. Hemophilia Inheritance Pattern" oninput="render()">
             </div>
             <div class="grid-2">
               <div class="toggle-row">
@@ -234,30 +650,34 @@ input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-
           Click an individual on the canvas to select them (highlighted in red). Then use the family action buttons above to add relatives safely.
         </div>
 
-      </div>
+      </aside>
 
-      <!-- RIGHT PANEL: Stage -->
-      <div class="split-right">
+      <!-- RIGHT PANEL: STAGE & EXPORT TRAY -->
+      <section class="split-right" id="stage-panel">
         <div class="canvas-wrapper" id="canvasWrapper">
           <canvas id="pedigreeCanvas" width="800" height="520"></canvas>
         </div>
 
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="downloadPNG()"><i class="ti ti-download"></i> Download PNG</button>
-          <button class="btn btn-green" id="copyBtn" onclick="copyPNG()"><i class="ti ti-copy"></i> Copy to Clipboard</button>
+        <div class="export-tray">
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="downloadPNG()"><i class="ti ti-download"></i> Download PNG</button>
+            <button class="btn btn-green" id="copyBtn" onclick="copyPNG()"><i class="ti ti-copy"></i> Copy to Clipboard</button>
+          </div>
+          <div class="feedback-row">
+            <span class="copy-feedback" id="copyFeedback"><i class="ti ti-check"></i> Copied pedigree to clipboard!</span>
+          </div>
         </div>
-        <span class="copy-feedback" id="copyFeedback"><i class="ti ti-check"></i> Copied pedigree to clipboard!</span>
-      </div>
+      </section>
 
     </div>
-  </div>
+  </main>
 </div>
 
 <script>
 'use strict';
 
 // ════════════════════════════════════════════════
-//  DATA STATE (100% UNIFIED STRUCTURAL MODEL)
+//  DATA STATE
 // ════════════════════════════════════════════════
 let ped = [];
 let marriages = [];
@@ -318,7 +738,6 @@ function alignPedigree() {
   const genMap = new Map();
   const visitedGen = new Set();
   
-  // Advanced BFS Traversal to correctly map generations even for in-laws
   ped.forEach(startNode => {
     if (visitedGen.has(startNode.id)) return;
     
@@ -333,18 +752,15 @@ function alignPedigree() {
       genMap.set(curr.id, curr.g);
       comp.push(curr.id);
 
-      // Traversal 1: Spouses (Same Generation)
       getSpousalMatings(curr.id).forEach(m => {
         const spId = m.p1 === curr.id ? m.p2 : m.p1;
         if (!visitedGen.has(spId)) q.push({id: spId, g: curr.g});
         
-        // Traversal 2: Children (Next Generation)
         m.children.forEach(cId => {
           if (!visitedGen.has(cId)) q.push({id: cId, g: curr.g + 1});
         });
       });
 
-      // Traversal 3: Parents (Previous Generation)
       const pMating = getParentMating(curr.id);
       if (pMating) {
         if (!visitedGen.has(pMating.p1)) q.push({id: pMating.p1, g: curr.g - 1});
@@ -352,7 +768,6 @@ function alignPedigree() {
       }
     }
 
-    // Shift component so the highest ancestor starts at Generation 0
     let minG = Infinity;
     comp.forEach(id => {
       if (genMap.get(id) < minG) minG = genMap.get(id);
@@ -413,7 +828,6 @@ function alignPedigree() {
         center = (childCenters[0] + childCenters[childCenters.length - 1]) / 2;
       }
 
-      // Preserve Male on Left, Female on Right when possible
       const p1Node = ped.find(x => x.id === m.p1);
       if (p1Node.sex === 1 || (p1Node.sex !== 2 && m.p1 === nodeId)) {
         posMap.set(m.p1, center - (NODE_SIZE + SPOUSE_GAP) / 2);
@@ -431,7 +845,6 @@ function alignPedigree() {
 
   let cursorX = 60;
   
-  // Layout roots first
   const roots = ped.filter(p => !getParentMating(p.id));
   const sortedRoots = roots.sort((a,b) => a.id - b.id);
   sortedRoots.forEach(r => {
@@ -589,7 +1002,6 @@ function actionDeleteSelected() {
   
   const idsToDelete = new Set([id]);
   
-  // 1. Cascade down
   let size;
   do {
     size = idsToDelete.size;
@@ -600,7 +1012,6 @@ function actionDeleteSelected() {
     });
   } while (idsToDelete.size > size);
 
-  // 2. Cleanup orphaned in-laws safely
   marriages.forEach(m => {
     if (idsToDelete.has(m.p1) && !idsToDelete.has(m.p2)) {
        const hasOtherBonds = marriages.some(om => (om.p1 === m.p2 || om.p2 === m.p2) && om.id !== m.id);
@@ -723,7 +1134,7 @@ canvas.addEventListener('click', e => {
 });
 
 /* ════════════════════════════════════════════════
-   CANVAS RENDERING
+   CANVAS RENDERING ENGINE
    ════════════════════════════════════════════════ */
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1124,38 +1535,112 @@ function clearTree() {
   loadPreset('empty');
 }
 
-function getTimestamp() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+/* ════════════════════════════════════════════════
+   PROJECT SAVE & OPEN ENGINE
+   ════════════════════════════════════════════════ */
+function saveTreeJSON() {
+  const project = {
+    app: 'A Humble Pedigree',
+    version: '1.1.0',
+    savedAt: new Date().toISOString(),
+    chartTitle: document.getElementById('chartTitle').value,
+    showGenNums: document.getElementById('showGenNums').checked,
+    showLegend: document.getElementById('showLegend').checked,
+    showNumbers: document.getElementById('showNumbers').checked,
+    showGenPrefix: document.getElementById('showGenPrefix').checked,
+    nextId: nextId,
+    nextTwinGroup: nextTwinGroup,
+    ped: ped,
+    marriages: marriages
+  };
+
+  const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.download = `Pedigree_${getTimestamp()}.json`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
-function downloadPNG() {
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (!data.ped || !data.marriages) {
+        throw new Error('Invalid Pedigree file schema.');
+      }
+
+      ped = data.ped || [];
+      marriages = data.marriages || [];
+      nextId = data.nextId || (Math.max(0, ...ped.map(p => p.id), ...marriages.map(m => m.id)) + 1);
+      nextTwinGroup = data.nextTwinGroup || (Math.max(0, ...ped.map(p => p.twinGroup || 0)) + 1);
+
+      if (data.chartTitle !== undefined) document.getElementById('chartTitle').value = data.chartTitle;
+      if (data.showGenNums !== undefined) document.getElementById('showGenNums').checked = data.showGenNums;
+      if (data.showLegend !== undefined) document.getElementById('showLegend').checked = data.showLegend;
+      if (data.showNumbers !== undefined) document.getElementById('showNumbers').checked = data.showNumbers;
+      if (data.showGenPrefix !== undefined) document.getElementById('showGenPrefix').checked = data.showGenPrefix;
+
+      selectPerson(null);
+      alignPedigree();
+      render();
+    } catch (err) {
+      alert('Error loading pedigree file: ' + err.message);
+    } finally {
+      e.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ════════════════════════════════════════════════
+   EXPORT & CLIPBOARD UTILITIES
+   ════════════════════════════════════════════════ */
+function getTimestamp() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+function downloadPNG(canvasId = 'pedigreeCanvas', filePrefix = 'Pedigree') {
+  const cvs = document.getElementById(canvasId);
+  if (!cvs) return;
   const a = document.createElement('a');
-  a.download = `Pedigree_${getTimestamp()}.png`;
-  a.href = canvas.toDataURL('image/png');
+  a.download = `${filePrefix}_${getTimestamp()}.png`;
+  a.href = cvs.toDataURL('image/png');
   a.click();
 }
 
-async function copyPNG() {
-  const btn = document.getElementById('copyBtn');
-  const fb = document.getElementById('copyFeedback');
+async function copyPNG(canvasId = 'pedigreeCanvas', btnId = 'copyBtn', feedbackId = 'copyFeedback') {
+  const cvs = document.getElementById(canvasId);
+  const btn = document.getElementById(btnId);
+  const fb = document.getElementById(feedbackId);
+  if (!cvs) return;
+
   try {
     const blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png');
+      cvs.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png');
     });
+
     if (navigator.clipboard && window.ClipboardItem) {
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       fb.style.display = 'inline-flex';
+      const origBg = btn.style.background;
       btn.style.background = '#145e2c';
+
       setTimeout(() => {
         fb.style.display = 'none';
-        btn.style.background = '#1a7a3a';
+        btn.style.background = origBg || '#1a7a3a';
       }, 2500);
       return;
     }
     throw new Error('Clipboard API unavailable');
   } catch (err) {
-    downloadPNG();
+    downloadPNG(canvasId, 'Pedigree');
   }
 }
 
