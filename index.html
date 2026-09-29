@@ -97,6 +97,20 @@ body {
   flex-shrink: 0;
   border-bottom: 1px solid var(--header-border);
 }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-icon {
+  height: 34px;
+  width: 34px;
+  display: block;
+  border: 1.5px solid #ffffff;
+  border-radius: 8px;
+  padding: 1px;
+  box-sizing: border-box;
+}
 .header-titles {
   display: flex;
   flex-direction: column;
@@ -477,9 +491,12 @@ input[type=checkbox] {
 
   <!-- TOP HEADER -->
   <header id="app-header">
-    <div class="header-titles">
-      <div id="app-title">A Humble Pedigree</div>
-      <div id="app-subtitle">Simple Pedigree Engine &mdash; Built by Steven Humble</div>
+    <div class="header-left">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e2a3a'/%3E%3Crect x='6' y='6' width='6' height='6' fill='%23fff' stroke='%233266ad' stroke-width='1.5'/%3E%3Ccircle cx='23' cy='9' r='3.5' fill='%23fff' stroke='%233266ad' stroke-width='1.5'/%3E%3Crect x='13' y='19' width='6' height='6' fill='%233266ad' stroke='%23fff' stroke-width='1.5'/%3E%3Cpath d='M9 12v3h7.5v4' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M23 12.5v2.5h-6.5' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" alt="App Icon" class="header-icon">
+      <div class="header-titles">
+        <div id="app-title">A Humble Pedigree</div>
+        <div id="app-subtitle">Simple Pedigree Engine &mdash; Built by Steven Humble</div>
+      </div>
     </div>
     <div class="toolbar-right">
       <button class="hdr-btn" onclick="saveTreeJSON()" title="Save Tree to JSON File"><i class="ti ti-device-floppy"></i> Save</button>
