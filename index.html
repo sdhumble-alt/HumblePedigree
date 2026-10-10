@@ -218,7 +218,7 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; flex-shrink: 
 <body>
 <div id="app">
 
-  <!-- Hidden File Input for Opening Saved Trees -->
+  <!-- Hidden File Input for Loading Saved Trees -->
   <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="handleFileSelect(event)">
 
   <!-- TOP HEADER -->
@@ -231,9 +231,10 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; flex-shrink: 
       </div>
     </div>
     <div class="toolbar-right">
+      <button class="hdr-btn" onclick="clearTree()" title="Create New Tree"><i class="ti ti-file-plus"></i> New</button>
       <button class="hdr-btn" onclick="saveTreeJSON()" title="Save Tree to JSON File"><i class="ti ti-device-floppy"></i> Save</button>
-      <button class="hdr-btn" onclick="document.getElementById('fileInput').click()" title="Open JSON File"><i class="ti ti-folder-open"></i> Open</button>
-      <div class="toolbar-ver">V 1.2.0 &mdash; 2026-10-08</div>
+      <button class="hdr-btn" onclick="document.getElementById('fileInput').click()" title="Load JSON File"><i class="ti ti-folder-open"></i> Load</button>
+      <div class="toolbar-ver">V 1.2.2 &mdash; 2026-10-10</div>
     </div>
   </header>
 
@@ -361,6 +362,30 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; flex-shrink: 
             </div>
             <div class="grid-2">
               <div class="field-row">
+                <label>Canvas Width</label>
+                <input type="number" id="canvasWidth" min="400" max="3000" value="800" onchange="resizeCanvas()">
+              </div>
+              <div class="field-row">
+                <label>Canvas Height</label>
+                <input type="number" id="canvasHeight" min="400" max="3000" value="520" onchange="resizeCanvas()">
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="field-row">
+                <label>Node Size</label>
+                <input type="number" id="nodeSize" min="10" max="100" value="28" onchange="updateLayoutMetrics()">
+              </div>
+              <div class="field-row">
+                <label>Node Spacing</label>
+                <input type="number" id="hSpacing" min="10" max="200" value="35" onchange="updateLayoutMetrics()">
+              </div>
+              <div class="field-row">
+                <label>Gen Spacing</label>
+                <input type="number" id="vSpacing" min="30" max="300" value="105" onchange="updateLayoutMetrics()">
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field-row">
                 <label>Carrier Symbol</label>
                 <select id="carrierDisplay" onchange="updateCarrierIcon()">
                   <option value="half">Half Shade</option>
@@ -392,10 +417,14 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; flex-shrink: 
                 <label for="showGenPrefix">Gen Prefix (II-1)</label>
               </div>
             </div>
-            <div class="btn-row" style="justify-content:flex-start; margin-top:10px;">
-              <button class="btn btn-secondary" onclick="openRandomPedigreeModal()"><i class="ti ti-template"></i> Sample Tree</button>
-              <button class="btn btn-secondary" onclick="clearTree()"><i class="ti ti-rotate-clockwise"></i> Clear Canvas</button>
+            
+            <!-- Action buttons forced to one line with flex proportional sizing -->
+            <div class="btn-row" style="flex-wrap: nowrap; gap: 4px; margin-top: 10px;">
+              <button class="btn btn-secondary" style="flex: 1; padding: 6px 4px; font-size: 8.5pt;" onclick="openRandomPedigreeModal()"><i class="ti ti-template"></i> Sample Tree</button>
+              <button class="btn btn-secondary" style="flex: 1; padding: 6px 4px; font-size: 8.5pt;" onclick="openApplyPatternModal()"><i class="ti ti-color-swatch"></i> Apply Pattern</button>
+              <button class="btn btn-secondary" style="flex: 1; padding: 6px 4px; font-size: 8.5pt;" onclick="clearTree()"><i class="ti ti-rotate-clockwise"></i> Clear Canvas</button>
             </div>
+
           </div>
         </div>
         
@@ -476,6 +505,39 @@ input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; flex-shrink: 
   </div>
 </div>
 
+<!-- APPLY PATTERN MODAL -->
+<div class="modal-overlay" id="applyPatternModal">
+  <div class="modal-content">
+    <div class="modal-header">Apply Inheritance Pattern</div>
+    
+    <div class="field-row">
+      <label>Inheritance Pattern</label>
+      <select id="applyInheritance">
+        <option value="AR">Autosomal Recessive</option>
+        <option value="AD">Autosomal Dominant</option>
+        <option value="XR">X-Linked Recessive</option>
+        <option value="XD">X-Linked Dominant</option>
+        <option value="Y">Y-Linked</option>
+        <option value="None">No Traits (All Unaffected)</option>
+      </select>
+    </div>
+    
+    <div class="toggle-row" style="margin-bottom: 12px;">
+      <input type="checkbox" id="applyShowCarriers" checked>
+      <label for="applyShowCarriers">Show Carriers Visually</label>
+    </div>
+
+    <div class="action-banner" style="color:var(--btn-danger-bg); background:#fdf2f2; border-color:#f0c0c8;">
+      <i class="ti ti-alert-triangle" style="vertical-align:-1px;"></i> <b>Warning:</b> This will remove any manually set traits or affections from the current pedigree and re-calculate them based entirely on the selected pattern.
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeApplyPatternModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="execApplyPattern()">Apply Pattern</button>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
 
@@ -488,12 +550,16 @@ let selectedId = null;
 let nextId = 1;
 let nextTwinGroup = 1;
 
-// Metrics
-const NODE_SIZE = 28;
-const HALF_SIZE = NODE_SIZE / 2;
-const GEN_Y_SPACING = 105; // Slightly increased for text breathing room
-const SPOUSE_GAP = 32;
-const SIBLING_GAP = 38;
+// Rendering Globals
+window.renderScale = 1;
+window.renderOffsetX = 0;
+
+// Layout Metrics (now mutable)
+let NODE_SIZE = 28;
+let HALF_SIZE = NODE_SIZE / 2;
+let GEN_Y_SPACING = 105; 
+let SPOUSE_GAP = 35;
+let SIBLING_GAP = 41;
 
 const canvas = document.getElementById('pedigreeCanvas');
 const ctx = canvas.getContext('2d');
@@ -512,6 +578,7 @@ function createPerson(sex = 1, aff = 1) {
     proband: false,
     twinGroup: null,
     monozygotic: false,
+    alleles: ['W', 'W'],
     x: 0,
     y: 0,
     generation: 0
@@ -530,6 +597,29 @@ function getParentMating(id) {
 
 function getSpousalMatings(id) {
   return marriages.filter(m => m.p1 === id || m.p2 === id);
+}
+
+function resizeCanvas() {
+  const w = parseInt(document.getElementById('canvasWidth').value) || 800;
+  const h = parseInt(document.getElementById('canvasHeight').value) || 520;
+  canvas.width = Math.max(400, Math.min(3000, w));
+  canvas.height = Math.max(400, Math.min(3000, h));
+  alignPedigree();
+  render();
+}
+
+function updateLayoutMetrics() {
+  NODE_SIZE = parseInt(document.getElementById('nodeSize').value) || 28;
+  HALF_SIZE = NODE_SIZE / 2;
+  
+  let h = parseInt(document.getElementById('hSpacing').value) || 35;
+  SPOUSE_GAP = h;
+  SIBLING_GAP = h + 6;
+  
+  GEN_Y_SPACING = parseInt(document.getElementById('vSpacing').value) || 105;
+  
+  alignPedigree();
+  render();
 }
 
 /* ════════════════════════════════════════════════
@@ -664,7 +754,7 @@ function alignPedigree() {
     }
   });
 
-  const startY = 70;
+  const startY = 70 + (HALF_SIZE);
   ped.forEach(p => {
     p.y = startY + (genMap.get(p.id) || 0) * GEN_Y_SPACING;
     p.x = posMap.get(p.id) || 60;
@@ -942,8 +1032,10 @@ canvas.addEventListener('click', e => {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
-  const mx = (e.clientX - rect.left) * scaleX;
-  const my = (e.clientY - rect.top) * scaleY;
+  
+  // Adjust mouse coordinates for global render scaling and offset
+  const mx = ((e.clientX - rect.left) * scaleX) / window.renderScale - window.renderOffsetX;
+  const my = ((e.clientY - rect.top) * scaleY) / window.renderScale;
 
   const hit = ped.find(n => Math.hypot((n.x || 0) - mx, (n.y || 0) - my) <= NODE_SIZE * 0.85);
   selectPerson(hit ? hit.id : null);
@@ -957,14 +1049,34 @@ function render() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const title = document.getElementById('chartTitle').value.trim();
-  if (title) {
-    ctx.font = 'bold 15px Georgia, "Times New Roman", serif';
-    ctx.fillStyle = '#1e2a3a';
-    ctx.textAlign = 'center';
-    ctx.fillText(title, canvas.width / 2, 26);
+  // -- 0. Determine Global Scale to Auto-Fit Pedigree to Canvas --
+  const xs = ped.map(n => n.x || 0);
+  const ys = ped.map(n => n.y || 0);
+  const minX = xs.length ? Math.min(...xs) : 0;
+  const maxX = xs.length ? Math.max(...xs) : 0;
+  const maxY = ys.length ? Math.max(...ys) : 0;
+
+  // Account for padding, potential generation numbers on left, and legend on bottom right
+  const pedW = (maxX - minX) + (NODE_SIZE * 4);
+  const pedH = maxY + (NODE_SIZE * 3);
+
+  window.renderScale = 1;
+  window.renderOffsetX = 0;
+
+  if (pedW > canvas.width || pedH > canvas.height) {
+    window.renderScale = Math.min(canvas.width / pedW, canvas.height / pedH);
+    const centerX = (minX + maxX) / 2;
+    const targetCenterX = canvas.width / (2 * window.renderScale);
+    window.renderOffsetX = targetCenterX - centerX;
   }
 
+  ctx.save();
+  ctx.scale(window.renderScale, window.renderScale);
+  if (window.renderOffsetX) {
+    ctx.translate(window.renderOffsetX, 0);
+  }
+
+  // 1. Generation Nums (drawn within scaled context)
   const showGenNums = document.getElementById('showGenNums').checked;
   const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 
@@ -974,11 +1086,12 @@ function render() {
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'left';
     sortedY.forEach((y, i) => {
-      ctx.fillText(roman[i] || (i + 1), 22, y + 5);
+      // Keep them anchored to the left of the bounding area
+      ctx.fillText(roman[i] || (i + 1), minX - NODE_SIZE * 1.5, y + 5);
     });
   }
 
-  // 1. Draw Marriages & Branching Drops
+  // 2. Draw Marriages & Branching Drops
   marriages.forEach(m => {
     const p1 = ped.find(n => n.id === m.p1);
     const p2 = ped.find(n => n.id === m.p2);
@@ -996,7 +1109,8 @@ function render() {
     const midY = (p1.y + p2.y) / 2;
 
     if (m.children.length) {
-      const stemY = midY + 42; // Lowered to give text clear halo
+      // Branching drop dynamically based on node size
+      const stemY = midY + (GEN_Y_SPACING * 0.4);
       const cNodes = m.children.map(cId => ped.find(n => n.id === cId)).filter(Boolean);
 
       ctx.beginPath();
@@ -1048,7 +1162,7 @@ function render() {
         const grpMin = Math.min(...group.map(c => c.x));
         const grpMax = Math.max(...group.map(c => c.x));
         const tMidX = (grpMin + grpMax) / 2;
-        const branchY = stemY + 12;
+        const branchY = stemY + (GEN_Y_SPACING * 0.12);
 
         ctx.beginPath();
         ctx.moveTo(tMidX, stemY);
@@ -1063,7 +1177,7 @@ function render() {
         });
 
         if (group[0].monozygotic) {
-           const monoY = stemY + 24;
+           const monoY = stemY + (GEN_Y_SPACING * 0.22);
            const cTopY = group[0].y - HALF_SIZE;
            const tRatio = (monoY - branchY) / (cTopY - branchY);
            const x1 = tMidX + tRatio * (group[0].x - tMidX);
@@ -1085,7 +1199,7 @@ function render() {
     ctx.restore();
   });
 
-  // 2. Numbering
+  // 3. Numbering
   if (document.getElementById('showNumbers').checked) {
     const rows = {};
     ped.forEach(n => {
@@ -1103,12 +1217,23 @@ function render() {
   const showGenPrefix = document.getElementById('showGenPrefix').checked;
   const labelSize = parseInt(document.getElementById('labelFontSize').value) || 10;
 
-  // 3. Draw Individuals
+  // 4. Draw Individuals
   ped.forEach(n => {
     drawIndividual(n, n.id === selectedId, showGenPrefix, roman, labelSize);
   });
+  
+  ctx.restore(); // END OF SCALED RENDERING
+  
+  // 5. Draw Title (Absolute to Canvas)
+  const title = document.getElementById('chartTitle').value.trim();
+  if (title) {
+    ctx.font = 'bold 15px Georgia, "Times New Roman", serif';
+    ctx.fillStyle = '#1e2a3a';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, canvas.width / 2, 26);
+  }
 
-  // 4. Legend
+  // 6. Draw Legend (Absolute to Canvas bottom-right)
   if (document.getElementById('showLegend').checked) {
     drawLegendBox();
   }
@@ -1186,7 +1311,7 @@ function drawIndividual(n, isSelected, showGenPrefix, roman, labelSize) {
       ctx.restore();
     } else {
       ctx.beginPath();
-      ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2);
+      ctx.arc(n.x, n.y, Math.max(2, NODE_SIZE*0.12), 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -1362,13 +1487,11 @@ function drawLegendBox() {
 /* ════════════════════════════════════════════════
    RANDOM PEDIGREE GENERATOR
    ════════════════════════════════════════════════ */
-function openRandomPedigreeModal() {
-  document.getElementById('randomModal').style.display = 'flex';
-}
+function openRandomPedigreeModal() { document.getElementById('randomModal').style.display = 'flex'; }
+function closeRandomModal() { document.getElementById('randomModal').style.display = 'none'; }
 
-function closeRandomModal() {
-  document.getElementById('randomModal').style.display = 'none';
-}
+function openApplyPatternModal() { document.getElementById('applyPatternModal').style.display = 'flex'; }
+function closeApplyPatternModal() { document.getElementById('applyPatternModal').style.display = 'none'; }
 
 function getChildAlleles(dadAlleles, momAlleles, childSex, type) {
   let dadPass, momPass;
@@ -1425,6 +1548,62 @@ function computeAffection(alleles, sex, type, showCarriers) {
   return 1;
 }
 
+function execApplyPattern() {
+  const type = document.getElementById('applyInheritance').value;
+  const showCarriers = document.getElementById('applyShowCarriers').checked;
+  
+  // 1. Reset affections and alleles
+  ped.forEach(p => { p.aff = 1; p.alleles = ['W', 'W']; });
+  
+  if (type === 'None') {
+    closeApplyPatternModal();
+    if (selectedId) updateInspectorVisuals(ped.find(p => p.id === selectedId) || {});
+    render();
+    return;
+  }
+  
+  // 2. Identify founders & assign alleles
+  const founders = ped.filter(p => !getParentMating(p.id));
+  founders.forEach((f, idx) => {
+    if (idx === 0) { // Force at least one founder to hold the trait
+      if (type === 'AR') f.alleles = ['A', 'a'];
+      else if (type === 'AD') f.alleles = ['A', 'a'];
+      else if (type === 'XR') f.alleles = f.sex === 1 ? ['X_a', 'Y'] : ['X_A', 'X_a'];
+      else if (type === 'XD') f.alleles = f.sex === 1 ? ['X_A', 'Y'] : ['X_A', 'X_a'];
+      else if (type === 'Y') f.alleles = f.sex === 1 ? ['X', 'Y_A'] : ['X', 'X'];
+    } else {
+      f.alleles = generateSpouseAlleles(f.sex, type);
+    }
+  });
+  
+  // 3. Top-down traversal to propagate alleles
+  const maxGen = Math.max(0, ...ped.map(p => p.generation || 0));
+  for (let g = 0; g <= maxGen; g++) {
+    let genNodes = ped.filter(p => p.generation === g);
+    genNodes.forEach(p => {
+      const pMating = getParentMating(p.id);
+      if (pMating) {
+        const m1 = ped.find(x => x.id === pMating.p1);
+        const m2 = ped.find(x => x.id === pMating.p2);
+        if (m1 && m2 && m1.alleles && m2.alleles) {
+          const dad = m1.sex === 1 ? m1 : m2;
+          const mom = m1.sex === 2 ? m1 : m2;
+          p.alleles = getChildAlleles(dad.alleles, mom.alleles, p.sex, type);
+        }
+      }
+    });
+  }
+  
+  // 4. Compute visual affection
+  ped.forEach(p => {
+    p.aff = computeAffection(p.alleles, p.sex, type, showCarriers);
+  });
+  
+  closeApplyPatternModal();
+  if (selectedId) updateInspectorVisuals(ped.find(p => p.id === selectedId) || {});
+  render();
+}
+
 function execRandomPedigree() {
   const type = document.getElementById('randInheritance').value;
   const showCarriers = document.getElementById('randShowCarriers').checked;
@@ -1476,7 +1655,6 @@ function execRandomPedigree() {
 
       let choices = [];
       
-      // Normal bell-curve around median for all generations
       for (let i = minKids; i <= maxKids; i++) {
         let dist = Math.abs(i - medKids);
         let weight = Math.max(1, (maxKids - minKids + 1) - dist);
@@ -1550,7 +1728,7 @@ function clearTree() {
 function saveTreeJSON() {
   const project = {
     app: 'A Humble Pedigree',
-    version: '1.2.0',
+    version: '1.2.2',
     savedAt: new Date().toISOString(),
     chartTitle: document.getElementById('chartTitle').value,
     carrierDisplay: document.getElementById('carrierDisplay').value,
@@ -1559,6 +1737,11 @@ function saveTreeJSON() {
     showLegend: document.getElementById('showLegend').checked,
     showNumbers: document.getElementById('showNumbers').checked,
     showGenPrefix: document.getElementById('showGenPrefix').checked,
+    canvasWidth: canvas.width,
+    canvasHeight: canvas.height,
+    nodeSize: document.getElementById('nodeSize').value,
+    hSpacing: document.getElementById('hSpacing').value,
+    vSpacing: document.getElementById('vSpacing').value,
     nextId: nextId,
     nextTwinGroup: nextTwinGroup,
     ped: ped,
@@ -1597,11 +1780,22 @@ function handleFileSelect(e) {
       if (data.showLegend !== undefined) document.getElementById('showLegend').checked = data.showLegend;
       if (data.showNumbers !== undefined) document.getElementById('showNumbers').checked = data.showNumbers;
       if (data.showGenPrefix !== undefined) document.getElementById('showGenPrefix').checked = data.showGenPrefix;
+      
+      if (data.canvasWidth) {
+        document.getElementById('canvasWidth').value = data.canvasWidth;
+        canvas.width = data.canvasWidth;
+      }
+      if (data.canvasHeight) {
+        document.getElementById('canvasHeight').value = data.canvasHeight;
+        canvas.height = data.canvasHeight;
+      }
+      if (data.nodeSize) { document.getElementById('nodeSize').value = data.nodeSize; }
+      if (data.hSpacing) { document.getElementById('hSpacing').value = data.hSpacing; }
+      if (data.vSpacing) { document.getElementById('vSpacing').value = data.vSpacing; }
 
       updateCarrierIcon();
+      updateLayoutMetrics();
       selectPerson(null);
-      alignPedigree();
-      render();
     } catch (err) {
       alert('Error loading pedigree file: ' + err.message);
     } finally {
@@ -1661,6 +1855,7 @@ async function copyPNG(canvasId = 'pedigreeCanvas', btnId = 'copyBtn', feedbackI
 window.onload = () => {
     updateCarrierIcon();
     document.getElementById('randInheritance').value = 'AR';
+    updateLayoutMetrics();
     execRandomPedigree();
 };
 </script>
